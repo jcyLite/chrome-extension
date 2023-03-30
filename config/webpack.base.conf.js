@@ -1,5 +1,6 @@
 const path = require("path");
 const { VueLoaderPlugin } = require("vue-loader/dist/index");
+const CopyWebpackPlugin = require('copy-webpack-plugin');
 //抽离css为单独的模块文件
 const MiniCssExtractPlugin = require("mini-css-extract-plugin");
 //打包友好提示
@@ -29,8 +30,10 @@ module.exports = {
     contentScript:  resolve('./src/contentScript.js'),
     background: resolve('./src/background.js'),
   },
+  devtool:  'source-map',
   output: {
-    assetModuleFilename: "assets/images/[contenthash][ext]" //自定义asset module资源打包后的路径和名字
+    filename: '[name].js',
+    clean:true
   },
   stats: "errors-only",
   resolve: {
@@ -98,6 +101,14 @@ module.exports = {
     ]
   },
   plugins: [
+    new CopyWebpackPlugin({
+      patterns: [
+        {
+          from: '**/*',
+          context: 'public',
+        },
+      ],
+    }),
     new webpack.DefinePlugin({
       // 定义环境和变量
       "process.env": {
@@ -108,7 +119,7 @@ module.exports = {
     }),
     new VueLoaderPlugin(),
     new MiniCssExtractPlugin({
-      filename: "assets/styles/[name].css" //配置css打包之后的存放路径（这个配置contenthash在开发环境会导致热更新css报错，开发环境直接用[name]）
+      filename: "[name].css" //配置css打包之后的存放路径（这个配置contenthash在开发环境会导致热更新css报错，开发环境直接用[name]）
     }),
     new FriendlyErrorsWebpackPlugin({
       // 成功的时候输出

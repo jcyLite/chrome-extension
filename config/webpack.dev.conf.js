@@ -5,12 +5,6 @@ const HtmlWebpackPlugin = require("html-webpack-plugin");
 const BaseWebpackConfig = require("./webpack.base.conf");
 module.exports = merge(BaseWebpackConfig, {
   mode: "development",
-  target: process.env.NODE_ENV === "development" ? "web" : "browserslist",
-  output: {
-    path: path.resolve(__dirname, "../dist"),
-    filename: "./js/[name].[chunkhash].js",
-    clean: true // 打包时先清除上次打包文件
-  },
   target: "web",
   devServer: {
     hot: true, //模块的热替换
@@ -28,15 +22,6 @@ module.exports = merge(BaseWebpackConfig, {
       }
     }
   },
-  plugins: [
-    new HtmlWebpackPlugin({
-      template: "./public/index.html", //用来做模板的html的文件路径
-      filename: "index.html", //生成的html的名字
-      title: "webpack5的项目配置", //这个就对应上文的title
-      inject: "body" //打包出来的那个js文件，放置在生成的body标签内
-    }),
-    new webpack.HotModuleReplacementPlugin()
-  ],
   optimization: {
     runtimeChunk: "single"
   }
