@@ -14,9 +14,11 @@ html {
   color: #222;
 }
 
-body {
-  width: 350px;
-  height: 300px;
+
+
+#app{
+  width:500px;
+  height:400px;
 }
 
 .app {

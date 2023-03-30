@@ -1,90 +1,125 @@
 <template>
-  <div class="home-box">
-    <div class="home-title">首页页面</div>
-    <div class="home-content">
-      <div class="first item">
-        <div class="content-title">测试vuex</div>
-        <div class="user-name">{{ userObj.userName }}</div>
-      </div>
-      <div class="second item">
-        <div class="content-title">测试vant按需引入</div>
-        <van-button type="success">成功按钮</van-button>
-      </div>
-      <div class="third item">
-        <div class="content-title">测试vue-router页面路由</div>
-        <button class="home-btn" @click="goToMine">前往我的页面</button>
-      </div>
-      <div class="fouth item">
-        <div class="content-title">测试vw的适配222</div>
-        <img src="@/assets/img/pic.jpeg" alt="" class="img-test" />
-      </div>
-      <div class="five item">
-        <div class="content-title">测试axios请求数据</div>
-        <van-button type="success" class="home-btn" @click="testAxios">
-          发送请求
-        </van-button>
-        <div class="content-request">{{ renderTest }}</div>
-      </div>
-    </div>
+  <div class="home">
+    <a-form layout="horizontal" labelAlign="left" class="form" :labelCol="labelCol" :wrapperCol="wrapperCol">
+      <a-form-item
+        label="开关："
+      >
+        <a-checkbox  v-model="isValid"></a-checkbox>
+      </a-form-item>
+      <a-form-item
+        label="请输入角色类型："
+      >
+        <a-radio-group v-model:value="role">
+          <a-radio-button value="driver">
+            司机
+          </a-radio-button>
+          <a-radio-button value="shipper">
+            货主
+          </a-radio-button>
+        </a-radio-group>
+      </a-form-item>
+      <a-form-item
+        label="请输入生效地址："
+      >
+        <div :key="index" v-for="(item,index) of urls">
+         <a-input  style="width:calc(100% - 90px);" v-model="urls[index]" placeholder="请输入生效地址" /> 
+         <span style="margin-left:10px;">
+            <plus-circle-outlined @click="addLine"/>
+            <minus-circle-outlined style="margin-left:10px;" @click="deleteLine(item)"/>
+         </span>
+        
+        </div>
+      </a-form-item>
+      <a-form-item
+        label="请输入手机号码："
+      >
+        <a-input v-model="phone" placeholder="请输入手机号码" />
+      </a-form-item>
+      <a-form-item
+        label="请输入token-key:"
+      >
+        <a-input  v-model="tokenKey" placeholder="请输入获得的token作为header中的哪个key" />
+      </a-form-item>
+    </a-form>
   </div>
 </template>
-<script setup>
-import { ref, computed } from "vue";
-import { useRouter } from "vue-router";
-import { useStore } from "vuex";
-import { httpGet } from "@/api/http.js";
-const router = useRouter();
-const store = useStore();
-const userObj = computed(() => store.state.user.userInfo);
-store.dispatch("user/getUserInfo");
 
-let renderTest = ref("这里将显示请求回来的数据");
-//路由跳转
-function goToMine() {
-  router.push("/mine");
-}
-//发送请求
-async function testAxios() {
-  try {
-    let params = {};
-    const res = await httpGet(params, "/justtest");
-    renderTest.value = res.data.content;
-  } catch (error) {}
-}
+<script>
+ 
+ import {PlusCircleOutlined,MinusCircleOutlined} from '@ant-design/icons-vue'
+import { getCurrentInstance,reactive, toRefs,watch } from 'vue';
+export default {
+  components:{PlusCircleOutlined,MinusCircleOutlined},
+  setup(){
+    const app = getCurrentInstance().proxy
+    localStorage.role = localStorage.role ||'shipper'
+    localStorage.env = localStorage.env||'dev'
+    localStorage.phone = localStorage.phone||''
+    localStorage.tokenKey =localStorage.tokenKey||''
+    localStorage.urls = localStorage.urls || JSON.stringify(['http://localhost:8080'])
+    const state = reactive({
+      formLayout: 'horizontal',
+      labelCol: { flex: 6},
+      wrapperCol: { flex: 18 },
+      isValid:(localStorage.isValid=='1')?true:false,
+      role:localStorage.role,
+      env:localStorage.env,
+      phone:localStorage.phone,
+      tokenKey:localStorage.tokenKey,
+      urls:JSON.parse(localStorage.urls),
+    })
+    watch(()=>[state.role],(v)=>{
+      console.log('vvvvv',v)
+    })
+    return {
+      ...toRefs(state),
+      addLine(){
+        console.log(12121212)
+        app.urls.push('')
+      },
+      deleteLine(url){
+        const index = app.urls.indexOf(url)
+        app.urls.splice(index,1)
+      }
+    };
+  },
+  watch:{
+    // isValid(v){
+    //   localStorage.isValid = (v?'1':'0')
+    // },
+    // role(v){
+    //   localStorage.role = v
+    // },
+    // env(v){
+    //   localStorage.env = v
+    // },
+    // phone(v){
+    //   localStorage.phone = v
+    // },
+    // tokenKey(v){
+    //   localStorage.tokenKey = v
+    // },
+    // urls:{
+    //   deep:true,
+    //   handler(v){
+    //     localStorage.urls = JSON.stringify(v)
+    //   }
+    // }
+  }
+};
 </script>
-<style lang="scss" scoped>
-.home-box {
-  width: 100%;
-  height: 100vh;
-  padding: 20px;
-  overflow: hidden;
-  box-sizing: border-box;
-  .home-title {
-    width: 400px;
-    height: 60px;
-    margin: 0 auto;
-    font-size: 30px;
-    text-align: center;
-    line-height: 60px;
-  }
-  .home-content {
-    width: 100%;
-    text-align: center;
-    .item {
-      box-sizing: border-box;
-      overflow: hidden;
-      margin: 15px;
-      border: 1px solid #55b3ff;
-      border-radius: 10px;
-      padding: 10px;
-      .content-title {
-        font-size: 10px;
-        margin-bottom: 15px;
-      }
-      .img-test {
-        width: 300px;
-      }
-    }
-  }
+
+<style lang="scss">
+body{
+  width:590px;
+  padding:10px;
+}
+.home{
+  width:100%;
+  height:100%;
+}
+.form {
+  width:100%;
+  padding-bottom:10px;
 }
 </style>
