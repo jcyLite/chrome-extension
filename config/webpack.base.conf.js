@@ -128,7 +128,8 @@ module.exports = {
       },
       // 是否每次都清空控制台
       clearConsole: true
-    })
+    }),
+    
   ],
   optimization: {
     nodeEnv: false
