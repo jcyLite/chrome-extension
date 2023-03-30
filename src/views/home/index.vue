@@ -4,7 +4,7 @@
       <a-form-item
         label="开关："
       >
-        <a-checkbox  v-model="isValid"></a-checkbox>
+        <a-checkbox  v-model:checked="isValid"></a-checkbox>
       </a-form-item>
       <a-form-item
         label="请输入角色类型："
@@ -22,7 +22,7 @@
         label="请输入生效地址："
       >
         <div :key="index" v-for="(item,index) of urls">
-         <a-input  style="width:calc(100% - 90px);" v-model="urls[index]" placeholder="请输入生效地址" /> 
+         <a-input  style="width:calc(100% - 90px);" v-model:value="urls[index]" placeholder="请输入生效地址" /> 
          <span style="margin-left:10px;">
             <plus-circle-outlined @click="addLine"/>
             <minus-circle-outlined style="margin-left:10px;" @click="deleteLine(item)"/>
@@ -33,13 +33,14 @@
       <a-form-item
         label="请输入手机号码："
       >
-        <a-input v-model="phone" placeholder="请输入手机号码" />
+        <a-input v-model:value="phone" placeholder="请输入手机号码" />
       </a-form-item>
       <a-form-item
         label="请输入token-key:"
       >
-        <a-input  v-model="tokenKey" placeholder="请输入获得的token作为header中的哪个key" />
+        <a-input  v-model:value="tokenKey" placeholder="请输入获得的token作为header中的哪个key" />
       </a-form-item>
+      <a-button @click="getToken">获取token</a-button>
     </a-form>
   </div>
 </template>
@@ -47,29 +48,33 @@
 <script>
  
  import {PlusCircleOutlined,MinusCircleOutlined} from '@ant-design/icons-vue'
-import { getCurrentInstance,reactive, toRefs,watch } from 'vue';
+import { getCurrentInstance,reactive, ref, toRefs,watch, watchEffect } from 'vue';
+
 export default {
   components:{PlusCircleOutlined,MinusCircleOutlined},
   setup(){
     const app = getCurrentInstance().proxy
-    localStorage.role = localStorage.role ||'shipper'
-    localStorage.env = localStorage.env||'dev'
-    localStorage.phone = localStorage.phone||''
-    localStorage.tokenKey =localStorage.tokenKey||''
-    localStorage.urls = localStorage.urls || JSON.stringify(['http://localhost:8080'])
+    let tokenInfo = {}
+    try{
+      tokenInfo = JSON.parse(localStorage.getItem('tokenInfo')||'{}')
+    }catch(err){}
     const state = reactive({
       formLayout: 'horizontal',
+      role:tokenInfo.role||'shipper',
+      isValid:(tokenInfo.isValid=='1')?true:false,
       labelCol: { flex: 6},
       wrapperCol: { flex: 18 },
-      isValid:(localStorage.isValid=='1')?true:false,
-      role:localStorage.role,
-      env:localStorage.env,
-      phone:localStorage.phone,
-      tokenKey:localStorage.tokenKey,
-      urls:JSON.parse(localStorage.urls),
+      env:tokenInfo.env||'dev',
+      phone:tokenInfo.phone,
+      tokenKey:tokenInfo.tokenKey||'authorization',
+      urls:tokenInfo.urls||['http://localhost:8080'],
     })
-    watch(()=>[state.role],(v)=>{
-      console.log('vvvvv',v)
+    console.log(state)
+    watch(()=>[state.isValid,state.role,state.env,state.phone,state.tokenKey,state.urls],(v)=>{
+      localStorage.setItem('tokenInfo',JSON.stringify({
+        ...tokenInfo,
+        ...state
+      }))
     })
     return {
       ...toRefs(state),
@@ -80,31 +85,11 @@ export default {
       deleteLine(url){
         const index = app.urls.indexOf(url)
         app.urls.splice(index,1)
+      },
+      getToken(){
+        chrome.runtime.sendMessage({greeting:'getTokenInfo' });
       }
     };
-  },
-  watch:{
-    // isValid(v){
-    //   localStorage.isValid = (v?'1':'0')
-    // },
-    // role(v){
-    //   localStorage.role = v
-    // },
-    // env(v){
-    //   localStorage.env = v
-    // },
-    // phone(v){
-    //   localStorage.phone = v
-    // },
-    // tokenKey(v){
-    //   localStorage.tokenKey = v
-    // },
-    // urls:{
-    //   deep:true,
-    //   handler(v){
-    //     localStorage.urls = JSON.stringify(v)
-    //   }
-    // }
   }
 };
 </script>

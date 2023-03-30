@@ -30,7 +30,7 @@ module.exports = {
     contentScript:  resolve('./src/contentScript.js'),
     background: resolve('./src/background.js'),
   },
-  devtool:  'source-map',
+  devtool:  'cheap-module-source-map',
   output: {
     filename: '[name].js',
     clean:true
@@ -130,8 +130,5 @@ module.exports = {
       clearConsole: true
     }),
     
-  ],
-  optimization: {
-    nodeEnv: false
-  }
+  ]
 };

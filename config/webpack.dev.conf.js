@@ -9,7 +9,7 @@ module.exports = merge(BaseWebpackConfig, {
   plugins:[
     new webpack.HotModuleReplacementPlugin()
   ],
-  optimization: {
-    runtimeChunk: "single"
-  }
+  // optimization: {
+  //   runtimeChunk: "single"
+  // }
 });
